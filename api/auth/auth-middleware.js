@@ -1,3 +1,5 @@
+const userModel = require("../users/users-model");
+
 /*
   Kullanıcının sunucuda kayıtlı bir oturumu yoksa
 
@@ -6,9 +8,7 @@
     "message": "Geçemezsiniz!"
   }
 */
-function sinirli() {
-
-}
+function sinirli() {}
 
 /*
   req.body de verilen username halihazırda veritabanında varsa
@@ -18,8 +18,17 @@ function sinirli() {
     "message": "Username kullaniliyor"
   }
 */
-function usernameBostami() {
-
+async function usernameBostami(req, res, next) {
+  try {
+    const user = await userModel.nameeGoreBul(req.body.username);
+    if (!user) {
+      next();
+    } else {
+      res.status(422).json({ message: "Username kullaniliyor" });
+    }
+  } catch (err) {
+    next(err);
+  }
 }
 
 /*
@@ -30,9 +39,7 @@ function usernameBostami() {
     "message": "Geçersiz kriter"
   }
 */
-function usernameVarmi() {
-
-}
+function usernameVarmi() {}
 
 /*
   req.body de şifre yoksa veya 3 karakterden azsa
@@ -42,8 +49,17 @@ function usernameVarmi() {
     "message": "Şifre 3 karakterden fazla olmalı"
   }
 */
-function sifreGecerlimi() {
-
+async function sifreGecerlimi(req, res, next) {
+  try {
+    const password = req.body.password;
+    if (password > 3) {
+      next();
+    } else {
+      res.status(422).json({ message: "Şifre 3 karakterden fazla olmalı" });
+    }
+  } catch (err) {
+    next(err);
+  }
 }
 
-// Diğer modüllerde kullanılabilmesi için fonksiyonları "exports" nesnesine eklemeyi unutmayın.
+module.exports = { usernameBostami, sifreGecerlimi };

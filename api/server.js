@@ -1,7 +1,8 @@
 const express = require("express");
 const helmet = require("helmet");
 const cors = require("cors");
-
+const session = require("express-session");
+const authRouter = require("./auth/auth-router");
 /**
   Kullanıcı oturumlarını desteklemek için `express-session` paketini kullanın!
   Kullanıcıların gizliliğini ihlal etmemek için, kullanıcılar giriş yapana kadar onlara cookie göndermeyin. 
@@ -15,8 +16,20 @@ const cors = require("cors");
   veya "connect-session-knex" gibi bir oturum deposu kullanabilirsiniz.
  */
 
-const server = express();
+sessionConfig = {
+  name: "cikolatacips",
+  secret: "bla bla",
+  cookie: {
+    maxAge: 1000 * 30,
+    secure: false,
+  },
+  httpOnly: true,
+  resave: false,
+  saveUninitialized: false,
+};
 
+const server = express();
+server.use(session(sessionConfig));
 server.use(helmet());
 server.use(express.json());
 server.use(cors());
@@ -25,7 +38,10 @@ server.get("/", (req, res) => {
   res.json({ api: "up" });
 });
 
-server.use((err, req, res, next) => { // eslint-disable-line
+server.use("/api/auth", authRouter);
+
+server.use((err, req, res, next) => {
+  // eslint-disable-line
   res.status(err.status || 500).json({
     message: err.message,
     stack: err.stack,
