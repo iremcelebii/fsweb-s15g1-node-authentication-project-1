@@ -40,6 +40,7 @@ router.post(
   authMd.sifreDogruMu,
   async (req, res, next) => {
     try {
+      //!cookie için gerekli
       const user = await userModel.nameeGoreBul(req.body.username);
       req.session.user_id = user.user_id;
       res.status(200).json({ message: `Hoşgeldin ${req.body.username}!` });
@@ -49,6 +50,26 @@ router.post(
   }
 );
 
+router.get("/logout", (req, res, next) => {
+  try {
+    if (req.session.user_id) {
+      req.session.destroy((err) => {
+        if (err) {
+          res
+            .status(500)
+            .json({ message: "session destroy edilirken hata oluştu" });
+        } else {
+          res.json({ message: "Çıkış yapildi" });
+        }
+      });
+    } else {
+      res.status(200).json({
+        message: "Oturum bulunamadı!",
+      });
+    }
+  } catch (error) {}
+});
+module.exports = router;
 /**
   2 [POST] /api/auth/login { "username": "sue", "password": "1234" }
 
@@ -80,8 +101,6 @@ router.post(
     "message": "Oturum bulunamadı!"
   }
  */
-
-module.exports = router;
 
 /**
   1 [POST] /api/auth/register { "username": "sue", "password": "1234" }
