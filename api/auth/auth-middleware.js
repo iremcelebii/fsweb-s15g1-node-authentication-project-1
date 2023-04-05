@@ -56,8 +56,8 @@ async function sifreDogruMu(req, res, next) {
 async function sinirli(req, res, next) {
   try {
     if (req.session && req.session.user_id) {
-      console.log(req.session);
-      console.log(req.session.user_id);
+      // console.log(req.session);
+      // console.log(req.session.user_id);
       next();
     } else {
       next({
