@@ -1,5 +1,3 @@
-// `checkUsernameFree`, `checkUsernameExists` ve `checkPasswordLength` gereklidir (require)
-// `auth-middleware.js` deki middleware fonksiyonları. Bunlara burda ihtiyacınız var!
 //!router.js adımlar:
 /*
     1. express'i import et --> const express = require("express");
@@ -29,7 +27,6 @@ router.post(
         username: req.body.username,
         password: hashedPassword,
       });
-
       res.status(201).json(newUser);
     } catch (err) {
       next(err);
@@ -37,28 +34,20 @@ router.post(
   }
 );
 
-/**
-  1 [POST] /api/auth/register { "username": "sue", "password": "1234" }
-
-  response:
-  status: 201
-  {
-    "user_id": 2,
-    "username": "sue"
+router.post(
+  "/login",
+  authMd.usernameVarmi,
+  authMd.sifreDogruMu,
+  async (req, res, next) => {
+    try {
+      const user = await userModel.nameeGoreBul(req.body.username);
+      req.session.user_id = user.user_id;
+      res.status(200).json({ message: `Hoşgeldin ${req.body.username}!` });
+    } catch (err) {
+      next(err);
+    }
   }
-
-  response username alınmış:
-  status: 422
-  {
-    "message": "Username kullaniliyor"
-  }
-
-  response şifre 3 ya da daha az karakterli:
-  status: 422
-  {
-    "message": "Şifre 3 karakterden fazla olmalı"
-  }
- */
+);
 
 /**
   2 [POST] /api/auth/login { "username": "sue", "password": "1234" }
@@ -92,5 +81,27 @@ router.post(
   }
  */
 
-// Diğer modüllerde kullanılabilmesi için routerı "exports" nesnesine eklemeyi unutmayın.
 module.exports = router;
+
+/**
+  1 [POST] /api/auth/register { "username": "sue", "password": "1234" }
+
+  response:
+  status: 201
+  {
+    "user_id": 2,
+    "username": "sue"
+  }
+
+  response username alınmış:
+  status: 422
+  {
+    "message": "Username kullaniliyor"
+  }
+
+  response şifre 3 ya da daha az karakterli:
+  status: 422
+  {
+    "message": "Şifre 3 karakterden fazla olmalı"
+  }
+ */

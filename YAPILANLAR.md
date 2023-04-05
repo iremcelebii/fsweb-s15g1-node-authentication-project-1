@@ -1,20 +1,6 @@
 1. npm i
-2. npm i express-session -->session:bir kullanıcının bilgileri doğrulandıktan sonra oluşturulan oturum kaydı
-3. const session=require("express-session") --> server.js'de import et
-4. sessionConfig objesini oluştur
-   sessionConfig = {
-   name: "cikolatacips",
-   secret: "bla bla",
-   cookie: {
-   maxAge: 1000 \* 30,
-   secure: false,
-   },
-   httpOnly: true,
-   resave: false,
-   saveUninitialized: false,
-   };
-5. server.use(session(sessionConfig)) --> express.json()'dan sonra yaz
-6. yeni bir kullanıcı ekleyeceğiz. user-model.js de fonksiyonu yazalım
+
+2. yeni bir kullanıcı ekleyeceğiz. user-model.js de fonksiyonu yazalım
    create fonsiyonunu yazmadan önce genelde getbyid fonksiyonunu da yazarız
 
    async function idyeGoreBul(user_id) {
@@ -29,7 +15,7 @@
    const newUser = await idyeGoreBul(id);
    return newUser;}
 
-7. yeni kullanıcı bilgileri nereden gelecek? auth/register end pointinden
+3. yeni kullanıcı bilgileri nereden gelecek? auth/register end pointinden
    router.post("/register", async (req, res, next) => {
    try {
    const newUser = await userModel.ekle(req.body);
@@ -38,12 +24,50 @@
    next(err);
    }});
 
-8. server.js de router'ı bağlayalım
+4. server.js de router'ı bağlayalım
    server.use("/api/auth", authRouter);
 
-9. oluşturduğumuz end pointin md lerini yazalım
+5. oluşturduğumuz end pointin md lerini yazalım
 
-10. parolayı kriptolamamız gerek. Naıl yapacağız?
-    ilk nerede parolayı alıyoruz?
-    auth-router da register end pointinde
-    const bcryptjs = require("bcryptjs"); -->import ettik
+6. parolayı kriptolamamız gerek. Naıl yapacağız?
+   ilk nerede parolayı alıyoruz?
+   auth-router da register end pointinde
+   const bcryptjs = require("bcryptjs"); -->import ettik
+   router.post(
+   "/register",
+   authMd.sifreGecerlimi,
+   authMd.usernameBostami,
+   async (req, res, next) => {
+   try {
+   const hashedPassword = bcryptjs.hashSync(req.body.password, 12);
+   const newUser = await userModel.ekle({
+   username: req.body.username,
+   password: hashedPassword,});
+   res.status(201).json(newUser);
+   } catch (err) {
+   next(err);
+   }});
+
+7. register end pointi bitti /api/auth/login 'e geçelim
+
+8. önce isim veritabanında kayıtlı mı diye baktık
+
+9. daha sonra şifre doğru mu diye baktık compareSync metoduyla
+
+10. şimdi giriş yapılmış mı diye bakacağız
+
+11. npm i express-session -->session:bir kullanıcının bilgileri doğrulandıktan sonra oluşturulan oturum kaydı
+12. const session=require("express-session") --> server.js'de import et
+13. sessionConfig objesini oluştur
+    sessionConfig = {
+    name: "cikolatacips",
+    secret: "bla bla",
+    cookie: {
+    maxAge: 1000 \* 30,
+    secure: false,
+    },
+    httpOnly: true,
+    resave: false,
+    saveUninitialized: false,
+    };
+14. server.use(session(sessionConfig)) --> express.json()'dan sonra yaz
